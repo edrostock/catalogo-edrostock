@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="es-AR" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Detalles del producto en el catálogo de Mi Catálogo - Charata, Chaco, Argentina.">
+  <meta name="robots" content="index, follow">
+  
+  <!-- Meta Etiquetas Dinámicas Open Graph -->
+  <meta property="og:title" id="og-title" content="Detalle de Producto | Mi Catálogo">
+  <meta property="og:description" id="og-desc" content="Consulta especificaciones y precio del producto en Charata, Chaco.">
+  <meta property="og:type" content="product">
+  <meta property="og:image" id="og-image" content="assets/logo.png">
+
+  <!-- Twitter Cards -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" id="twitter-title" content="Detalle de Producto | Mi Catálogo">
+  <meta name="twitter:description" id="twitter-desc" content="Consulta especificaciones y precio del producto.">
+  <meta name="twitter:image" id="twitter-image" content="assets/logo.png">
+
+  <title id="page-title">Cargando producto... | Mi Catálogo</title>
+
+  <!-- Favicon y PWA Manifest -->
+  <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+  <link rel="shortcut icon" type="image/x-icon" href="assets/favicon.ico">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#2563eb">
+
+  <!-- Tipografía Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Hojas de Estilo -->
+  <link rel="stylesheet" href="css/style.css">
+
+  <!-- Schema.org JSON-LD (Inyectado por product-detail.js) -->
+  <script type="application/ld+json" id="schema-jsonld"></script>
+</head>
+<body>
+
+  <!-- ====================================================================
+       1. ENCABEZADO Y MODO OSCURO
+       ==================================================================== -->
+  <header class="header">
+    <div class="container header__content">
+      <a href="index.html" class="header__brand" id="store-brand">
+        <img src="assets/logo.png" alt="Mi Catálogo Logo" class="header__logo" id="store-logo-img">
+        <span id="store-name-display">Mi Catálogo</span>
+      </a>
+
+      <div class="header__actions">
+        <a href="index.html" class="btn btn--primary" style="padding: 0.5rem 1rem;">
+          &larr; Volver al Catálogo
+        </a>
+        <button id="theme-toggle" class="theme-toggle-btn" aria-label="Cambiar tema claro/oscuro">
+          🌙
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ====================================================================
+       2. CONTENEDOR PRINCIPAL DEL DETALLE DEL PRODUCTO
+       ==================================================================== -->
+  <main class="container" style="padding-top: 2rem; padding-bottom: 4rem;">
+    <!-- Breadcrumb de Navegación -->
+    <nav class="breadcrumb" id="breadcrumb" aria-label="Migas de pan" style="margin-bottom: 1.5rem; font-size: 0.875rem; color: var(--text-muted);">
+      <!-- Inyectado dinámicamente -->
+    </nav>
+
+    <!-- Ficha del Producto o Skeleton Loading -->
+    <div id="product-detail-wrapper">
+      <!-- Inyectado por product-detail.js -->
+    </div>
+
+    <!-- Sección de Productos Relacionados -->
+    <section id="related-section" class="hidden" style="margin-top: 4rem; border-top: 1px solid var(--border-color); padding-top: 2rem;">
+      <h3 style="font-size: 1.35rem; font-weight: 700; margin-bottom: 1.5rem;">Productos Relacionados</h3>
+      <div id="related-products-grid" class="products-grid">
+        <!-- Renderizado por UI -->
+      </div>
+    </section>
+  </main>
+
+  <!-- Botones Flotantes -->
+  <div class="floating-actions">
+    <a href="#" id="floating-whatsapp" class="whatsapp-float" target="_blank" rel="noopener noreferrer" aria-label="Consultar por WhatsApp">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-0.999 3.648 3.742-.981z"/>
+      </svg>
+    </a>
+  </div>
+
+  <div id="toast" class="toast">¡Enlace copiado al portapapeles!</div>
+
+  <!-- Pie de Página -->
+  <footer class="footer">
+    <div class="container">
+      <p>&copy; <span id="current-year"></span> <span id="footer-store-name">Mi Catálogo</span>. Charata, Chaco, Argentina. Todos los derechos reservados.</p>
+    </div>
+  </footer>
+
+  <!-- Scripts Modulares -->
+  <script src="js/config.js"></script>
+  <script src="js/api.js" defer></script>
+  <script src="js/ui.js" defer></script>
+  <script src="js/product-detail.js" defer></script>
+</body>
+</html>

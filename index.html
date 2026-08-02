@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="es-AR" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Catálogo de productos de Mi Catálogo en Charata, Chaco, Argentina. Consultas directas por WhatsApp.">
+  <meta name="robots" content="index, follow">
+  
+  <!-- Open Graph / Redes Sociales (Facebook, WhatsApp, LinkedIn) -->
+  <meta property="og:title" content="Mi Catálogo | Charata, Chaco, Argentina">
+  <meta property="og:description" content="Explora nuestro catálogo de productos en Charata, Chaco. Envíos y atención personalizada por WhatsApp.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="assets/logo.png">
+
+  <!-- Twitter Cards -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Mi Catálogo | Charata, Chaco, Argentina">
+  <meta name="twitter:description" content="Explora nuestro catálogo de productos en Charata, Chaco. Consultas inmediatas por WhatsApp.">
+  <meta name="twitter:image" content="assets/logo.png">
+
+  <title>Mi Catálogo | Charata, Chaco, Argentina</title>
+
+  <!-- Favicon y PWA Manifest -->
+  <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+  <link rel="shortcut icon" type="image/x-icon" href="assets/favicon.ico">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#2563eb">
+
+  <!-- Tipografía Google Fonts (Inter) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Hojas de Estilo -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- ====================================================================
+       1. ENCABEZADO Y MODO OSCURO (HEADER)
+       ==================================================================== -->
+  <header class="header">
+    <div class="container header__content">
+      <!-- Marca y Descripción -->
+      <div class="header__brand-group">
+        <a href="index.html" class="header__brand" id="store-brand">
+          <img src="assets/logo.png" alt="Mi Catálogo Logo" class="header__logo" id="store-logo-img">
+          <span id="store-name-display">Mi Catálogo</span>
+        </a>
+        <p class="header__description" id="store-description-display">Charata, Chaco, Argentina</p>
+      </div>
+
+      <!-- Buscador en tiempo real y Acciones -->
+      <div class="header__actions">
+        <div class="header__search-container">
+          <svg class="header__search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input 
+            type="text" 
+            id="search-input" 
+            class="header__search-input" 
+            placeholder="Buscar por nombre, SKU, categoría..."
+            aria-label="Buscar productos en el catálogo"
+          >
+        </div>
+
+        <!-- Botón Toggle Modo Oscuro / Claro -->
+        <button id="theme-toggle" class="theme-toggle-btn" aria-label="Cambiar tema claro/oscuro" title="Cambiar tema">
+          🌙
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ====================================================================
+       2. BARRA DE CONTROLES: CATEGORÍAS Y FILTROS SECUNDARIOS
+       ==================================================================== -->
+  <section class="controls-bar">
+    <div class="container controls-bar__wrapper">
+      <!-- Categorías Dinámicas generadas automáticamente desde la API -->
+      <nav class="categories__list" id="categories-container" aria-label="Categorías de productos">
+        <!-- Generado por ui.js -->
+      </nav>
+
+      <!-- Filtros Secundarios: Disponibilidad y Ordenamiento -->
+      <div class="filters-secondary">
+        <div class="filter-group">
+          <label for="filter-availability" class="sort__label">Stock:</label>
+          <select id="filter-availability" class="filter-select" aria-label="Filtrar por disponibilidad">
+            <option value="all">Todos los productos</option>
+            <option value="in-stock">En stock disponible</option>
+            <option value="out-of-stock">Agotados</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label for="sort-select" class="sort__label">Ordenar por:</label>
+          <select id="sort-select" class="sort__select" aria-label="Ordenar catálogo por">
+            <option value="default">Recomendados</option>
+            <option value="newest">Más recientes</option>
+            <option value="popularity">Más vendidos</option>
+            <option value="price-asc">Precio: Menor a Mayor</option>
+            <option value="price-desc">Precio: Mayor a Menor</option>
+            <option value="name-asc">Nombre: A - Z</option>
+            <option value="name-desc">Nombre: Z - A</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====================================================================
+       3. CONTENEDOR PRINCIPAL DEL CATÁLOGO
+       ==================================================================== -->
+  <main class="catalog-section container">
+    <!-- Meta del catálogo (Contador) -->
+    <div class="catalog__meta">
+      <span class="catalog__count" id="product-count">Cargando productos...</span>
+    </div>
+
+    <!-- Grilla donde se inyectan las tarjetas o los Skeletons -->
+    <div id="products-grid" class="products-grid" aria-live="polite">
+      <!-- Skeletons o Productos inyectados por UI -->
+    </div>
+
+    <!-- Estado vacío cuando no hay coincidencias -->
+    <div id="empty-state" class="empty-state hidden">
+      <div class="empty-state__icon">🔍</div>
+      <h3 class="empty-state__title">No se encontraron productos</h3>
+      <p class="empty-state__desc">Intenta ajustar tu búsqueda o seleccionar otra categoría.</p>
+    </div>
+
+    <!-- Paginación de Productos -->
+    <nav id="pagination-container" class="pagination" aria-label="Navegación de páginas">
+      <!-- Renderizado dinámico de la paginación -->
+    </nav>
+  </main>
+
+  <!-- ====================================================================
+       4. MODAL DE DETALLE RÁPIDO DEL PRODUCTO
+       ==================================================================== -->
+  <div id="product-modal" class="modal" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal__content">
+      <button id="modal-close" class="modal__close" aria-label="Cerrar ventana de detalle">&times;</button>
+      <div id="modal-body" class="modal__body">
+        <!-- Contenido inyectado por UI -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ====================================================================
+       5. BOTONES FLOTANTES (WHATSAPP Y VOLVER ARRIBA)
+       ==================================================================== -->
+  <div class="floating-actions">
+    <a href="#" id="floating-whatsapp" class="whatsapp-float" target="_blank" rel="noopener noreferrer" aria-label="Consultar por WhatsApp">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-0.999 3.648 3.742-.981z"/>
+      </svg>
+    </a>
+
+    <button id="back-to-top" class="back-to-top hidden" aria-label="Volver al inicio de la página">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="18 15 12 9 6 15"></polyline>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Contenedor para Avisos Flotantes (Toast) -->
+  <div id="toast" class="toast">¡Enlace copiado al portapapeles!</div>
+
+  <!-- ====================================================================
+       6. PIE DE PÁGINA (FOOTER)
+       ==================================================================== -->
+  <footer class="footer">
+    <div class="container">
+      <p>&copy; <span id="current-year"></span> <span id="footer-store-name">Mi Catálogo</span>. Charata, Chaco, Argentina. Todos los derechos reservados.</p>
+      <p style="margin-top: 0.5rem; font-size: 0.8rem;">Conectado en vivo con Google Sheets mediante Google Apps Script.</p>
+    </div>
+  </footer>
+
+  <!-- ====================================================================
+       7. SCRIPTS MODULARES
+       ==================================================================== -->
+  <script src="js/config.js"></script>
+  <script src="js/api.js" defer></script>
+  <script src="js/ui.js" defer></script>
+  <script src="js/filters.js" defer></script>
+  <script src="js/app.js" defer></script>
+</body>
+</html>
