@@ -146,6 +146,63 @@ const ApiService = {
     return mainImage ? [mainImage] : [CONFIG.PLACEHOLDER_IMAGE];
   },
 
+/**
+ * Convierte los atributos provenientes de Apps Script
+ * a un formato simple para mostrarlos correctamente.
+ */
+normalizeAttributes(attributes) {
+
+  if (!attributes || typeof attributes !== "object") {
+    return {};
+  }
+
+  const normalized = {};
+
+  Object.entries(attributes).forEach(([key, value]) => {
+
+    // Si viene como arreglo [{valor:"Negro",precio:0}]
+    if (Array.isArray(value)) {
+
+      normalized[key] = value
+        .map(item => {
+
+          if (typeof item === "object" && item !== null) {
+
+            return item.valor ?? item.value ?? "";
+
+          }
+
+          return item;
+
+        })
+        .filter(Boolean)
+        .join(", ");
+
+    }
+
+    // Si viene como objeto
+    else if (typeof value === "object" && value !== null) {
+
+      normalized[key] =
+        value.valor ??
+        value.value ??
+        JSON.stringify(value);
+
+    }
+
+    // Si ya viene como texto
+    else {
+
+      normalized[key] = value;
+
+    }
+
+  });
+
+  return normalized;
+
+},
+  
   /**
    * Fallback de emergencia (desactivado por omisión en producción).
    */
