@@ -125,7 +125,7 @@ const ApiService = {
       sku: String(raw.sku || raw.SKU || `SKU-${Math.floor(1000 + Math.random() * 9000)}`),
       image: mainImage,
       gallery: this.parseGallery(raw.galeria || raw.gallery || raw.Galeria, mainImage),
-      attributes: typeof raw.atributos === 'object' && raw.atributos !== null ? raw.atributos : {},
+      attributes: this.normalizeAttributes(raw.atributos),
       status: String(raw.estado || raw.status || raw.Estado || "activo"),
       visible: raw.visible !== undefined ? Boolean(raw.visible) : true,
       popularity: parseInt(raw.popular || raw.popularidad || raw.popularity || 0, 10),
