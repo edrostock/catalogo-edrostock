@@ -56,6 +56,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     renderBreadcrumb(breadcrumb, product);
 
     // 7. Renderizar Ficha Completa del Producto
+    window.currentDetailProduct = product;
     renderProductDetail(wrapper, product);
 
     // 8. Renderizar Productos Relacionados
@@ -144,6 +145,42 @@ function renderProductDetail(container, product) {
   const whatsappUrl = UI.generateWhatsAppUrl(product);
   const isOutOfStock = product.stock === 0;
 
+  // Renderizar selector de variantes si existen
+  let variantsHTML = '';
+  if (product.variants && product.variants.length > 0) {
+    const options = product.variants.map((v, i) => `
+      <button 
+        class="variant-btn category-btn ${i === 0 ? 'active' : ''} ${v.stock === 0 ? 'disabled' : ''}" 
+        data-label="${v.label}"
+        ${v.stock === 0 ? 'disabled style="opacity:0.5;"' : ''}
+      >
+        ${v.label}
+      </button>
+    `).join('');
+
+    variantsHTML = `
+      <div style="margin-bottom: 1.5rem;">
+        <h4 style="font-size: 0.95rem; font-weight: 600; margin-bottom: 0.5rem;">Seleccionar Opción / Variante:</h4>
+        <div class="variant-options" style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+          ${options}
+        </div>
+      </div>
+    `;
+  }
+
+  // Renderizar banner de venta mayorista / descuento por volumen
+  let bulkBannerHTML = '';
+  if (product.description && (product.description.toLowerCase().includes('comprando') || product.description.toLowerCase().includes('unidades por pack'))) {
+    bulkBannerHTML = `
+      <div style="background-color: var(--primary-light); border: 1px solid var(--primary-color); border-radius: var(--border-radius-md); padding: 0.85rem 1rem; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.75rem;">
+        <span style="font-size: 1.25rem;">🏷️</span>
+        <div style="font-size: 0.85rem; color: var(--text-main);">
+          <strong>Promoción por Cantidad Disponible</strong>
+        </div>
+      </div>
+    `;
+  }
+
   // Renderizar imágenes de la galería
   const thumbnailsHTML = product.gallery.map((imgUrl, index) => `
     <img 
@@ -214,19 +251,15 @@ function renderProductDetail(container, product) {
           <p style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.6;">${product.description}</p>
         </div>
 
+        ${bulkBannerHTML}
+        ${variantsHTML}
         ${attributesHTML}
 
-        <!-- Acciones: Botón WhatsApp y Compartir -->
+        <!-- Acciones: Botón Carrito y Compartir -->
         <div style="display: flex; flex-wrap: wrap; gap: 1rem; margin-top: auto; padding-top: 1.5rem;">
-          <a 
-            href="${whatsappUrl}" 
-            target="_blank" 
-            rel="noopener noreferrer" 
-            class="btn btn--whatsapp ${isOutOfStock ? 'disabled' : ''}" 
-            style="flex: 1; min-width: 200px; padding: 0.85rem 1.5rem; font-size: 1rem;"
-          >
-            💬 Consultar por WhatsApp
-          </a>
+          <div id="detail-action-wrapper" data-id="${product.id}" style="flex: 1; min-width: 200px;">
+            ${UI.renderProductActionButton(product)}
+          </div>
 
           <button 
             id="share-btn" 
@@ -268,6 +301,44 @@ function renderProductDetail(container, product) {
       } else {
         navigator.clipboard.writeText(window.location.href);
         UI.showToast("¡Enlace del producto copiado al portapapeles!");
+      }
+    });
+  }
+
+  // Configurar interacción con las opciones de variante
+  container.querySelectorAll('.variant-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      container.querySelectorAll('.variant-btn').forEach(b => b.classList.remove('active'));
+      e.currentTarget.classList.add('active');
+    });
+  });
+
+  // Configurar agregar al carrito (delegación en wrapper)
+  const detailWrapper = document.getElementById('detail-action-wrapper');
+  if (detailWrapper) {
+    detailWrapper.addEventListener('click', (e) => {
+      const addBtn = e.target.closest('.btn-add-cart');
+      const plusBtn = e.target.closest('.btn-qty-plus');
+      const minusBtn = e.target.closest('.btn-qty-minus');
+
+      const activeVariantBtn = container.querySelector('.variant-btn.active');
+      const selectedVariant = activeVariantBtn ? activeVariantBtn.getAttribute('data-label') : null;
+
+      if (addBtn) {
+        e.preventDefault();
+        if (typeof Cart !== 'undefined') Cart.addItem(product, selectedVariant);
+      } else if (plusBtn) {
+        e.preventDefault();
+        if (typeof Cart !== 'undefined') {
+          const currentQty = Cart.getItemQuantity(product.id);
+          Cart.updateQuantity(product.id, currentQty + 1);
+        }
+      } else if (minusBtn) {
+        e.preventDefault();
+        if (typeof Cart !== 'undefined') {
+          const currentQty = Cart.getItemQuantity(product.id);
+          Cart.updateQuantity(product.id, currentQty - 1);
+        }
       }
     });
   }

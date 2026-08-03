@@ -24,10 +24,7 @@ const ApiService = {
     try {
       console.log("📡 Conectando con la API de Google Apps Script...");
 
-      const response = await fetch(API_URL, {
-        method: "GET",
-        headers: { "Accept": "application/json" }
-      });
+      const response = await fetch(API_URL);
 
       if (!response.ok) {
         throw new Error(`Error HTTP ${response.status}: ${response.statusText}`);
@@ -126,6 +123,7 @@ const ApiService = {
       image: mainImage,
       gallery: this.parseGallery(raw.galeria || raw.gallery || raw.Galeria, mainImage),
       attributes: this.normalizeAttributes(raw.atributos),
+      variants: this.parseVariants(raw),
       status: String(raw.estado || raw.status || raw.Estado || "activo"),
       visible: raw.visible !== undefined ? Boolean(raw.visible) : true,
       popularity: parseInt(raw.popular || raw.popularidad || raw.popularity || 0, 10),
@@ -207,6 +205,30 @@ normalizeAttributes(attributes) {
    * Fallback de emergencia (desactivado por omisión en producción).
    */
   getMockProducts() {
+    return [];
+  },
+
+  /**
+   * Extrae la lista de variantes (Talles / Colores) si la fila del Sheet la contiene.
+   */
+  parseVariants(raw) {
+    const rawVariants = raw.variantes || raw.variants || raw.Variantes || raw.variaciones;
+    if (!rawVariants) return [];
+    
+    if (typeof rawVariants === 'string' && rawVariants.includes('|')) {
+      return rawVariants.split(',').map(part => {
+        const [label, stockStr] = part.split('|');
+        return {
+          label: label.trim(),
+          stock: stockStr !== undefined ? parseInt(stockStr.trim(), 10) : 1
+        };
+      });
+    }
+
+    if (Array.isArray(rawVariants)) {
+      return rawVariants.map(v => typeof v === 'object' ? { label: v.nombre || v.label, stock: v.stock || 1 } : { label: String(v), stock: 1 });
+    }
+
     return [];
   }
 };

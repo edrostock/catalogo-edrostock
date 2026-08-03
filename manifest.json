@@ -1,7 +1,7 @@
 {
   "name": "EdroStock",
   "short_name": "EdroStock",
-  "description": "-",
+  "description": "Catálogo en línea de EdroStock",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#0f172a",

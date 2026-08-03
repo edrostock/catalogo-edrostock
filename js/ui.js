@@ -18,6 +18,8 @@ const UI = {
 
   // Instancia global del IntersectionObserver para Lazy Loading
   imageObserver: null,
+  // Almacén local de productos renderizados actualmente
+  currentProducts: [],
 
   /**
    * Inicializa el gestor de Tema Claro / Oscuro.
@@ -156,6 +158,35 @@ const UI = {
   },
 
   /**
+   * Genera el HTML del botón o control de cantidad según el estado en el carrito.
+   */
+  renderProductActionButton(product) {
+    const isOutOfStock = product.stock === 0;
+    const qty = typeof Cart !== 'undefined' ? Cart.getItemQuantity(product.id) : 0;
+
+    if (qty > 0) {
+      const isMaxStock = product.stock && qty >= product.stock;
+      return `
+        <div class="card-qty-control" data-id="${product.id}">
+          <button class="btn-qty-minus card-qty-btn" data-id="${product.id}" aria-label="Restar">-</button>
+          <span class="card-qty-value">${qty}</span>
+          <button class="btn-qty-plus card-qty-btn ${isMaxStock ? 'disabled' : ''}" data-id="${product.id}" aria-label="Sumar" ${isMaxStock ? 'disabled' : ''}>+</button>
+        </div>
+      `;
+    }
+
+    return `
+      <button 
+        class="btn btn--whatsapp btn-add-cart ${isOutOfStock ? 'disabled' : ''}"
+        data-id="${product.id}"
+        ${isOutOfStock ? 'disabled style="opacity:0.5; pointer-events:none;"' : ''}
+      >
+        Agregar al Carrito
+      </button>
+    `;
+  },
+
+  /**
    * Renderiza la lista de tarjetas de producto en la grilla.
    * 
    * @param {HTMLElement} container - Elemento `#products-grid`.
@@ -163,6 +194,8 @@ const UI = {
    */
   renderProducts(container, products) {
     if (!container) return;
+
+    this.currentProducts = products || [];
 
     if (!products || products.length === 0) {
       container.innerHTML = '';
@@ -179,9 +212,8 @@ const UI = {
         ? `<span class="product-card__price-old">${this.formatPrice(product.oldPrice)}</span>` 
         : '';
 
-      const isOutOfStock = product.stock === 0;
       const detailUrl = `producto.html?id=${encodeURIComponent(product.id)}`;
-      const whatsappUrl = this.generateWhatsAppUrl(product);
+      const actionButtonHTML = this.renderProductActionButton(product);
 
       return `
         <article class="product-card" data-id="${product.id}">
@@ -217,15 +249,9 @@ const UI = {
               <a href="${detailUrl}" class="btn btn--primary">
                 Ver Más
               </a>
-              <a 
-                href="${whatsappUrl}" 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                class="btn btn--whatsapp ${isOutOfStock ? 'disabled' : ''}"
-                ${isOutOfStock ? 'style="opacity:0.5; pointer-events:none;"' : ''}
-              >
-                WhatsApp
-              </a>
+              <div class="card-action-wrapper" data-id="${product.id}">
+                ${actionButtonHTML}
+              </div>
             </div>
           </div>
         </article>
@@ -236,6 +262,60 @@ const UI = {
 
     // Inicializar IntersectionObserver para las nuevas imágenes cargadas
     this.initIntersectionObserver(container);
+
+    // Event Delegation para botones de tarjetas (Agregar, +, -)
+    if (!container.dataset.hasCartListeners) {
+      container.dataset.hasCartListeners = "true";
+      container.addEventListener('click', (e) => {
+        const addBtn = e.target.closest('.btn-add-cart');
+        const plusBtn = e.target.closest('.btn-qty-plus');
+        const minusBtn = e.target.closest('.btn-qty-minus');
+
+        if (addBtn) {
+          e.preventDefault();
+          const id = addBtn.getAttribute('data-id');
+          const product = this.currentProducts.find(p => String(p.id) === String(id));
+          if (product && typeof Cart !== 'undefined') {
+            Cart.addItem(product);
+          }
+        } else if (plusBtn) {
+          e.preventDefault();
+          const id = plusBtn.getAttribute('data-id');
+          if (typeof Cart !== 'undefined') {
+            const currentQty = Cart.getItemQuantity(id);
+            Cart.updateQuantity(id, currentQty + 1);
+          }
+        } else if (minusBtn) {
+          e.preventDefault();
+          const id = minusBtn.getAttribute('data-id');
+          if (typeof Cart !== 'undefined') {
+            const currentQty = Cart.getItemQuantity(id);
+            Cart.updateQuantity(id, currentQty - 1);
+          }
+        }
+      });
+    }
+  },
+
+  /**
+   * Actualiza el HTML de los controles de acción en las tarjetas sin re-renderizar la grilla.
+   */
+  updateCardActions() {
+    document.querySelectorAll('.card-action-wrapper').forEach(wrapper => {
+      const id = wrapper.getAttribute('data-id');
+      if (id && this.currentProducts) {
+        const product = this.currentProducts.find(p => String(p.id) === String(id));
+        if (product) {
+          wrapper.innerHTML = this.renderProductActionButton(product);
+        }
+      }
+    });
+
+    // Actualizar también en la ficha técnica si estamos en producto.html
+    const detailWrapper = document.getElementById('detail-action-wrapper');
+    if (detailWrapper && typeof currentDetailProduct !== 'undefined') {
+      detailWrapper.innerHTML = this.renderProductActionButton(currentDetailProduct);
+    }
   },
 
   /**

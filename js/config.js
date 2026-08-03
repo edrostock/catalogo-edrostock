@@ -28,7 +28,7 @@ const GOOGLE_SHEETS_URL = "https://docs.google.com/spreadsheets/d/1kWK_t5H2rSN_3
 const CONFIG = {
   // Información del Comercio
   STORE_NAME: "EdroStock",
-  STORE_DESCRIPTION: "-",
+  STORE_DESCRIPTION: "Catálogo de tecnología y accesorios",
   STORE_CITY: "Charata",
   STORE_PROVINCE: "Chaco",
   STORE_COUNTRY: "Argentina",

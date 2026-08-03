@@ -3,19 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="-.">
+  <meta name="description" content="Catálogo en línea de EdroStock - Los mejores productos tecnológicos en Charata, Chaco.">
   <meta name="robots" content="index, follow">
   
   <!-- Open Graph / Redes Sociales (Facebook, WhatsApp, LinkedIn) -->
   <meta property="og:title" content="EdroStock | Charata, Chaco, Argentina">
-  <meta property="og:description" content="-">
+  <meta property="og:description" content="Catálogo en línea de EdroStock - Los mejores productos tecnológicos en Charata, Chaco.">
   <meta property="og:type" content="website">
   <meta property="og:image" content="assets/logo.png">
 
   <!-- Twitter Cards -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="EdroStock | Charata, Chaco, Argentina">
-  <meta name="twitter:description" content="-">
+  <meta name="twitter:description" content="Catálogo en línea de EdroStock - Los mejores productos tecnológicos en Charata, Chaco.">
   <meta name="twitter:image" content="assets/logo.png">
 
   <title>EdroStock</title>
@@ -66,9 +66,14 @@
           >
         </div>
 
-        <!-- Botón Toggle Modo Oscuro / Claro -->
-        <button id="theme-toggle" class="theme-toggle-btn" aria-label="Cambiar tema claro/oscuro" title="Cambiar tema">
-          🌙
+        <button id="theme-toggle" class="theme-toggle-btn" aria-label="Alternar modo oscuro">
+          <span id="theme-icon">🌙</span>
+        </button>
+        <button id="header-cart-btn" class="header-cart-btn" aria-label="Ver carrito">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="22" height="22">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+          </svg>
+          <span id="cart-badge" class="cart-badge hidden">0</span>
         </button>
       </div>
     </div>
@@ -167,6 +172,30 @@
     </button>
   </div>
 
+  <!-- ====================================================================
+       CARRO DE COMPRAS (MODAL)
+       ==================================================================== -->
+  <div id="cart-modal" class="modal" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal__content modal__content--cart">
+      <div class="cart-header">
+        <h2 style="margin: 0; font-size: 1.25rem;">Tu Carrito</h2>
+        <button id="cart-modal-close" class="modal__close" aria-label="Cerrar carrito">&times;</button>
+      </div>
+      <div id="cart-items" class="cart-items">
+        <!-- Inyectado por cart.js -->
+      </div>
+      <div class="cart-footer">
+        <div class="cart-total">
+          <span>Total:</span>
+          <span id="cart-total-price">$0.00</span>
+        </div>
+        <button id="cart-checkout-btn" class="btn btn--whatsapp" style="width: 100%; margin-top: 1rem;">
+          Enviar pedido por WhatsApp
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- Contenedor para Avisos Flotantes (Toast) -->
   <div id="toast" class="toast">¡Enlace copiado al portapapeles!</div>
 
@@ -187,6 +216,7 @@
   <script src="js/api.js" defer></script>
   <script src="js/ui.js" defer></script>
   <script src="js/filters.js" defer></script>
+  <script src="js/cart.js" defer></script>
   <script src="js/app.js" defer></script>
 </body>
 </html>

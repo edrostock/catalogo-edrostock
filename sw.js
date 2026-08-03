@@ -9,7 +9,7 @@
  * @version 3.1.0
  */
 
-const CACHE_NAME = 'catalogo-v3.1.0';
+const CACHE_NAME = 'catalogo-v3.4.0';
 const STATIC_ASSETS = [
   './',
   './index.html',
@@ -21,6 +21,7 @@ const STATIC_ASSETS = [
   './js/filters.js',
   './js/app.js',
   './js/product-detail.js',
+  './js/cart.js',
   './manifest.json',
   './robots.txt',
   './sitemap.xml',
