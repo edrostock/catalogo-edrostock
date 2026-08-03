@@ -1,7 +1,7 @@
 {
   "name": "Mi Catálogo",
   "short_name": "Mi Catálogo",
-  "description": "Catálogo de productos de Mi Catálogo en Charata, Chaco, Argentina.",
+  "description": "-",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#0f172a",
