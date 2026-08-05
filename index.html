@@ -82,65 +82,105 @@
   <!-- ====================================================================
        2. BARRA DE CONTROLES: CATEGORÍAS Y FILTROS SECUNDARIOS
        ==================================================================== -->
-  <section class="controls-bar">
-    <div class="container controls-bar__wrapper">
-      <!-- Categorías Dinámicas generadas automáticamente desde la API -->
-      <nav class="categories__list" id="categories-container" aria-label="Categorías de productos">
-        <!-- Generado por ui.js -->
-      </nav>
-
-      <!-- Filtros Secundarios: Disponibilidad y Ordenamiento -->
-      <div class="filters-secondary">
-        <div class="filter-group">
-          <label for="filter-availability" class="sort__label">Stock:</label>
-          <select id="filter-availability" class="filter-select" aria-label="Filtrar por disponibilidad">
-            <option value="all">Todos los productos</option>
-            <option value="in-stock">En stock disponible</option>
-            <option value="out-of-stock">Agotados</option>
-          </select>
-        </div>
-
-        <div class="filter-group">
-          <label for="sort-select" class="sort__label">Ordenar por:</label>
-          <select id="sort-select" class="sort__select" aria-label="Ordenar catálogo por">
-            <option value="default">Recomendados</option>
-            <option value="newest">Más recientes</option>
-            <option value="popularity">Más vendidos</option>
-            <option value="price-asc">Precio: Menor a Mayor</option>
-            <option value="price-desc">Precio: Mayor a Menor</option>
-            <option value="name-asc">Nombre: A - Z</option>
-            <option value="name-desc">Nombre: Z - A</option>
-          </select>
-        </div>
-      </div>
-    </div>
-  </section>
+  <!-- Overlay para cierre del sidebar en dispositivos móviles -->
+  <div id="sidebar-overlay" class="sidebar-overlay hidden"></div>
 
   <!-- ====================================================================
-       3. CONTENEDOR PRINCIPAL DEL CATÁLOGO
+       2. CONTENEDOR PRINCIPAL DEL CATÁLOGO (LAYOUT CON SIDEBAR LATERAL)
        ==================================================================== -->
   <main class="catalog-section container">
-    <!-- Meta del catálogo (Contador) -->
-    <div class="catalog__meta">
-      <span class="catalog__count" id="product-count">Cargando productos...</span>
-    </div>
+    <div class="catalog-layout">
+      <!-- SIDEBAR LATERAL DE CATEGORÍAS Y FILTROS -->
+      <aside id="sidebar-filters" class="sidebar-filters">
+        <div class="sidebar-filters__header">
+          <h2 class="sidebar-filters__title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="4" y1="6" x2="20" y2="6"></line>
+              <line x1="4" y1="12" x2="20" y2="12"></line>
+              <line x1="4" y1="18" x2="20" y2="18"></line>
+            </svg>
+            Categorías
+          </h2>
+          <button id="sidebar-close-btn" class="sidebar-close-btn" aria-label="Cerrar ventana de filtros">&times;</button>
+        </div>
 
-    <!-- Grilla donde se inyectan las tarjetas o los Skeletons -->
-    <div id="products-grid" class="products-grid" aria-live="polite">
-      <!-- Skeletons o Productos inyectados por UI -->
-    </div>
+        <!-- Categorías Dinámicas generadas automáticamente desde la API (Árbol Vertical) -->
+        <nav class="sidebar-categories" id="categories-container" aria-label="Categorías de productos">
+          <!-- Generado por ui.js -->
+        </nav>
 
-    <!-- Estado vacío cuando no hay coincidencias -->
-    <div id="empty-state" class="empty-state hidden">
-      <div class="empty-state__icon">🔍</div>
-      <h3 class="empty-state__title">No se encontraron productos</h3>
-      <p class="empty-state__desc">Intenta ajustar tu búsqueda o seleccionar otra categoría.</p>
-    </div>
+        <!-- Bloque de Filtros Adicionales en el Sidebar -->
+        <div class="sidebar-extra-filters">
+          <div class="sidebar-filter-block">
+            <h3 class="sidebar-filter-block__title">Disponibilidad</h3>
+            <select id="filter-availability" class="filter-select" aria-label="Filtrar por disponibilidad">
+              <option value="all">Todos los productos</option>
+              <option value="in-stock">En stock disponible</option>
+              <option value="out-of-stock">Agotados</option>
+            </select>
+          </div>
 
-    <!-- Paginación de Productos -->
-    <nav id="pagination-container" class="pagination" aria-label="Navegación de páginas">
-      <!-- Renderizado dinámico de la paginación -->
-    </nav>
+          <div class="sidebar-filter-block">
+            <h3 class="sidebar-filter-block__title">Rango de Precio</h3>
+            <div class="price-range-inputs">
+              <input type="number" id="filter-price-min" class="filter-input" placeholder="Mín $" min="0">
+              <span class="price-range-separator">-</span>
+              <input type="number" id="filter-price-max" class="filter-input" placeholder="Máx $" min="0">
+            </div>
+          </div>
+
+          <button id="btn-clear-filters" class="btn btn--outline btn-clear-filters">
+            🗑️ Limpiar Filtros
+          </button>
+        </div>
+      </aside>
+
+      <!-- ÁREA PRINCIPAL DE CONTENIDO (CONTADOR, ORDENAR Y GRILLA) -->
+      <div class="catalog-main">
+        <!-- Barra de Controles Superiores: Meta, Botón Móvil y Ordenar -->
+        <div class="catalog-top-bar">
+          <div class="catalog-top-bar__left">
+            <button id="mobile-filter-toggle" class="mobile-filter-btn" aria-label="Abrir panel de filtros">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+              </svg>
+              <span>Filtros</span>
+            </button>
+            <span class="catalog__count" id="product-count">Cargando productos...</span>
+          </div>
+
+          <div class="catalog-top-bar__right">
+            <label for="sort-select" class="sort__label">Ordenar por:</label>
+            <select id="sort-select" class="sort__select" aria-label="Ordenar catálogo por">
+              <option value="default">Recomendados</option>
+              <option value="newest">Más recientes</option>
+              <option value="popularity">Más vendidos</option>
+              <option value="price-asc">Precio: Menor a Mayor</option>
+              <option value="price-desc">Precio: Mayor a Menor</option>
+              <option value="name-asc">Nombre: A - Z</option>
+              <option value="name-desc">Nombre: Z - A</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Grilla donde se inyectan las tarjetas o los Skeletons -->
+        <div id="products-grid" class="products-grid" aria-live="polite">
+          <!-- Skeletons o Productos inyectados por UI -->
+        </div>
+
+        <!-- Estado vacío cuando no hay coincidencias -->
+        <div id="empty-state" class="empty-state hidden">
+          <div class="empty-state__icon">🔍</div>
+          <h3 class="empty-state__title">No se encontraron productos</h3>
+          <p class="empty-state__desc">Intenta ajustar tu búsqueda o seleccionar otra categoría.</p>
+        </div>
+
+        <!-- Paginación de Productos -->
+        <nav id="pagination-container" class="pagination" aria-label="Navegación de páginas">
+          <!-- Renderizado dinámico de la paginación -->
+        </nav>
+      </div>
+    </div>
   </main>
 
   <!-- ====================================================================
