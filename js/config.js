@@ -59,6 +59,9 @@ const CONFIG = {
   // Redes Sociales (Eliminadas las ficticias por solicitud)
   SOCIAL_LINKS: null,
 
+  // Registro local de exclusiones de cupones por producto (para pruebas en local)
+  COUPON_EXCLUSIONS: {},
+
   // Configuración de Seguridad en Producción (Desactivar datos ficticios en caso de error)
   USE_MOCK_DATA_ON_FAILURE: false
 };

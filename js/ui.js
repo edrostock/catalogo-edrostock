@@ -20,6 +20,8 @@ const UI = {
   imageObserver: null,
   // Almacén local de productos renderizados actualmente
   currentProducts: [],
+  // Conjunto de categorías desplegadas en el sidebar
+  expandedCategories: new Set(),
 
   /**
    * Inicializa el gestor de Tema Claro / Oscuro.
@@ -89,7 +91,8 @@ const UI = {
   },
 
   /**
-   * Renderiza los botones de categorías dinámicas en la barra de navegación.
+   * Renderiza las categorías dinámicas en la lista vertical del Sidebar.
+   * Soporta categorías simples y jerárquicas (ej: "Periféricos > Teclados").
    * 
    * @param {HTMLElement} container - Contenedor `#categories-container`.
    * @param {Array<string>} categories - Lista de nombres de categorías.
@@ -99,34 +102,176 @@ const UI = {
   renderCategories(container, categories, activeCategory = 'all', onSelectCallback) {
     if (!container) return;
 
-    const allCategories = ['all', ...categories];
+    // Organizar categorías simples y jerárquicas (Padre > Hijo)
+    const tree = { 'all': { name: 'Todas las categorías', fullPath: 'all', children: {} } };
 
-    const buttonsHTML = allCategories.map(cat => {
-      const isAll = cat === 'all';
-      const label = isAll ? 'Todas' : cat;
-      const isActive = activeCategory.toLowerCase() === cat.toLowerCase();
+    categories.forEach(catStr => {
+      if (!catStr) return;
+      // Dividir por '/' o '>' para extraer padre y subcategorías
+      const parts = catStr.split(/[\/>]/).map(s => s.trim()).filter(Boolean);
+      
+      if (parts.length === 1) {
+        if (!tree[parts[0]]) {
+          tree[parts[0]] = { name: parts[0], fullPath: parts[0], children: {} };
+        }
+      } else {
+        const parent = parts[0];
+        const child = parts.slice(1).join(' / ');
 
-      return `
-        <button 
-          class="category-btn ${isActive ? 'active' : ''}" 
-          data-category="${cat}"
-        >
-          ${label}
-        </button>
+        if (!tree[parent]) {
+          tree[parent] = { name: parent, fullPath: parent, children: {} };
+        }
+        tree[parent].children[child] = { name: child, fullPath: catStr };
+      }
+    });
+
+    let html = '';
+
+    // Renderizar "Todas" primero
+    const isAllActive = activeCategory === 'all' || !activeCategory;
+    html += `
+      <button class="sidebar-cat-item ${isAllActive ? 'active' : ''}" data-category="all">
+        <span>Todas las categorías</span>
+        <span class="cat-icon">&rsaquo;</span>
+      </button>
+    `;
+
+    // Renderizar categorías
+    Object.keys(tree).forEach(key => {
+      if (key === 'all') return;
+      const item = tree[key];
+      const hasChildren = Object.keys(item.children).length > 0;
+      
+      const cleanActive = activeCategory ? activeCategory.toLowerCase() : '';
+      const isParentExact = cleanActive === item.fullPath.toLowerCase();
+      const isChildActive = cleanActive.startsWith(item.name.toLowerCase() + '/') ||
+        cleanActive.startsWith(item.name.toLowerCase() + ' >') ||
+        cleanActive.startsWith(item.name.toLowerCase() + ' /');
+      
+      const isParentActive = isParentExact || isChildActive;
+      const itemKeyLower = item.name.toLowerCase();
+
+      // Abrir si fue expandido manualmente por el usuario o si una subcategoría está activa
+      const isOpen = this.expandedCategories.has(itemKeyLower) || isChildActive;
+
+      html += `
+        <div class="sidebar-cat-group" data-group-name="${item.name}">
+          <button class="sidebar-cat-item ${isParentActive ? 'active' : ''}" data-category="${item.fullPath}">
+            <span>${item.name}</span>
+            <span class="cat-icon">${hasChildren ? (isOpen ? '▼' : '▸') : '&rsaquo;'}</span>
+          </button>
       `;
-    }).join('');
 
-    container.innerHTML = buttonsHTML;
-
-    // Asignar listeners
-    if (typeof onSelectCallback === 'function') {
-      container.querySelectorAll('.category-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-          const selectedCat = e.currentTarget.getAttribute('data-category');
-          onSelectCallback(selectedCat);
+      if (hasChildren) {
+        html += `<div class="sidebar-subcat-list ${isOpen ? 'open' : ''}">`;
+        Object.keys(item.children).forEach(childKey => {
+          const child = item.children[childKey];
+          const isSelected = cleanActive === child.fullPath.toLowerCase();
+          html += `
+            <button class="sidebar-subcat-item ${isSelected ? 'active' : ''}" data-category="${child.fullPath}">
+              ${child.name}
+            </button>
+          `;
         });
+        html += `</div>`;
+      }
+
+      html += `</div>`;
+    });
+
+    container.innerHTML = html;
+
+    // Asignar listeners del acordeón
+    if (typeof onSelectCallback === 'function') {
+      container.querySelectorAll('.sidebar-cat-group').forEach(group => {
+        const parentBtn = group.querySelector('.sidebar-cat-item');
+        const subcatList = group.querySelector('.sidebar-subcat-list');
+        const groupName = group.getAttribute('data-group-name');
+
+        if (parentBtn) {
+          parentBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            
+            const groupKeyLower = groupName ? groupName.toLowerCase() : '';
+
+            // Alternar estado de expansión
+            if (subcatList && groupKeyLower) {
+              if (this.expandedCategories.has(groupKeyLower)) {
+                this.expandedCategories.delete(groupKeyLower);
+              } else {
+                this.expandedCategories.add(groupKeyLower);
+              }
+            }
+
+            const selectedCat = parentBtn.getAttribute('data-category');
+            onSelectCallback(selectedCat);
+            UI.closeMobileSidebar();
+          });
+        }
+
+        if (subcatList) {
+          subcatList.querySelectorAll('.sidebar-subcat-item').forEach(subBtn => {
+            subBtn.addEventListener('click', (e) => {
+              e.stopPropagation();
+              const groupKeyLower = groupName ? groupName.toLowerCase() : '';
+              if (groupKeyLower) this.expandedCategories.add(groupKeyLower);
+              const selectedCat = subBtn.getAttribute('data-category');
+              onSelectCallback(selectedCat);
+              UI.closeMobileSidebar();
+            });
+          });
+        }
+      });
+
+      // Listener para botón "Todas las categorías"
+      const allBtn = container.querySelector('.sidebar-cat-item[data-category="all"]');
+      if (allBtn) {
+        allBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          this.expandedCategories.clear();
+          onSelectCallback('all');
+          UI.closeMobileSidebar();
+        });
+      }
+    }
+  },
+
+  /**
+   * Configura los eventos del drawer móvil para abrir/cerrar el sidebar de filtros.
+   */
+  initMobileSidebar() {
+    const toggleBtn = document.getElementById('mobile-filter-toggle');
+    const closeBtn = document.getElementById('sidebar-close-btn');
+    const overlay = document.getElementById('sidebar-overlay');
+    const sidebar = document.getElementById('sidebar-filters');
+
+    if (toggleBtn && sidebar && overlay) {
+      toggleBtn.addEventListener('click', () => {
+        sidebar.classList.add('mobile-open');
+        overlay.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
       });
     }
+
+    if (closeBtn) {
+      closeBtn.addEventListener('click', () => this.closeMobileSidebar());
+    }
+
+    if (overlay) {
+      overlay.addEventListener('click', () => this.closeMobileSidebar());
+    }
+  },
+
+  /**
+   * Cierra el sidebar móvil.
+   */
+  closeMobileSidebar() {
+    const sidebar = document.getElementById('sidebar-filters');
+    const overlay = document.getElementById('sidebar-overlay');
+
+    if (sidebar) sidebar.classList.remove('mobile-open');
+    if (overlay) overlay.classList.add('hidden');
+    document.body.style.overflow = '';
   },
 
   /**

@@ -48,7 +48,16 @@ const FilterEngine = {
    */
   filterByCategory(products, category) {
     if (!category || category === 'all') return products;
-    return products.filter(p => p.category.toLowerCase() === category.toLowerCase());
+    const cleanCat = category.toLowerCase().trim();
+    return products.filter(p => {
+      if (!p.category) return false;
+      const productCat = p.category.toLowerCase().trim();
+      return productCat === cleanCat || 
+             productCat.startsWith(cleanCat + '/') || 
+             productCat.startsWith(cleanCat + ' /') || 
+             productCat.startsWith(cleanCat + '>') || 
+             productCat.startsWith(cleanCat + ' >');
+    });
   },
 
   /**

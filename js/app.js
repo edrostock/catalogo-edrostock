@@ -39,8 +39,9 @@ const AppState = {
 document.addEventListener('DOMContentLoaded', async () => {
   console.log("🚀 Inicializando Mi Catálogo Web Pro...");
 
-  // 1. Inicializar Tema Claro / Oscuro
+  // 1. Inicializar Tema Claro / Oscuro y Sidebar Móvil
   UI.initThemeToggle();
+  UI.initMobileSidebar();
 
   // 2. Configurar la información de la marca desde config.js
   initStoreBrand();
@@ -153,6 +154,9 @@ function setupEventListeners() {
   const searchInput = document.getElementById('search-input');
   const sortSelect = document.getElementById('sort-select');
   const availabilitySelect = document.getElementById('filter-availability');
+  const priceMinInput = document.getElementById('filter-price-min');
+  const priceMaxInput = document.getElementById('filter-price-max');
+  const clearFiltersBtn = document.getElementById('btn-clear-filters');
   const backToTopBtn = document.getElementById('back-to-top');
 
   if (searchInput) {
@@ -178,6 +182,53 @@ function setupEventListeners() {
     availabilitySelect.addEventListener('change', (e) => {
       AppState.criteria.availability = e.target.value;
       AppState.pagination.currentPage = 1;
+      applyFiltersAndRender();
+    });
+  }
+
+  // Filtros de Rango de Precio (Min / Max)
+  const handlePriceChange = () => {
+    const minVal = priceMinInput ? parseFloat(priceMinInput.value) : null;
+    const maxVal = priceMaxInput ? parseFloat(priceMaxInput.value) : null;
+    AppState.criteria.minPrice = !isNaN(minVal) ? minVal : null;
+    AppState.criteria.maxPrice = !isNaN(maxVal) ? maxVal : null;
+    AppState.pagination.currentPage = 1;
+    applyFiltersAndRender();
+  };
+
+  let priceDebounceTimer;
+  if (priceMinInput) {
+    priceMinInput.addEventListener('input', () => {
+      clearTimeout(priceDebounceTimer);
+      priceDebounceTimer = setTimeout(handlePriceChange, 300);
+    });
+  }
+  if (priceMaxInput) {
+    priceMaxInput.addEventListener('input', () => {
+      clearTimeout(priceDebounceTimer);
+      priceDebounceTimer = setTimeout(handlePriceChange, 300);
+    });
+  }
+
+  // Botón Limpiar Filtros
+  if (clearFiltersBtn) {
+    clearFiltersBtn.addEventListener('click', () => {
+      AppState.criteria = {
+        searchQuery: '',
+        category: 'all',
+        availability: 'all',
+        minPrice: null,
+        maxPrice: null,
+        sortBy: 'default'
+      };
+      if (searchInput) searchInput.value = '';
+      if (availabilitySelect) availabilitySelect.value = 'all';
+      if (sortSelect) sortSelect.value = 'default';
+      if (priceMinInput) priceMinInput.value = '';
+      if (priceMaxInput) priceMaxInput.value = '';
+      AppState.pagination.currentPage = 1;
+      
+      renderCategoriesUI();
       applyFiltersAndRender();
     });
   }
