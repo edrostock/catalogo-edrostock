@@ -42,6 +42,13 @@ const ApiService = {
         productsList = rawData.data;
       }
 
+      // Procesar y enviar cupones dinámicos al carrito si existen en la respuesta de la API
+      if (rawData && Array.isArray(rawData.coupons)) {
+        if (typeof Cart !== 'undefined' && typeof Cart.setCoupons === 'function') {
+          Cart.setCoupons(rawData.coupons);
+        }
+      }
+
       // Normalizar objetos y filtrar únicamente los que tengan visible !== false
       return productsList
         .map(product => this.normalizeProduct(product))
@@ -126,6 +133,25 @@ const ApiService = {
       variants: this.parseVariants(raw),
       status: String(raw.estado || raw.status || raw.Estado || "activo"),
       visible: raw.visible !== undefined ? Boolean(raw.visible) : true,
+      appliesCoupon: (function() {
+        const title = String(raw.titulo || raw.name || raw.title || '').toLowerCase().trim();
+        const sku = String(raw.sku || raw.SKU || '').toLowerCase().trim();
+        const id = raw.id || raw.ID || raw.rowNumber || '';
+
+        let slugKey = 'id_' + id;
+        if (title) slugKey = 'title_' + title.replace(/[^a-z0-9]/g, '_');
+        else if (sku && sku !== '-') slugKey = 'sku_' + sku.replace(/[^a-z0-9]/g, '_');
+
+        try {
+          const map = JSON.parse(localStorage.getItem('edrostock_coupon_map')) || {};
+          if (map[slugKey] !== undefined) return map[slugKey] === true;
+        } catch (e) {}
+
+        if (raw.aplicaCupon !== undefined && raw.aplicaCupon !== "") {
+          return String(raw.aplicaCupon).toUpperCase() === 'TRUE' || String(raw.aplicaCupon) === '1' || raw.aplicaCupon === true;
+        }
+        return true;
+      })(),
       popularity: parseInt(raw.popular || raw.popularidad || raw.popularity || 0, 10),
       createdAt: raw.fecha || raw.createdAt || raw.Fecha || new Date().toISOString()
     };
